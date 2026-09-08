@@ -103,6 +103,10 @@ describe("Service Medal Recommendation Aid", () => {
 
     render(await ServiceMedalRecommendationPage());
 
+    expect(
+      screen.getByRole("heading", { name: "Service Medal Recommendation" }),
+    ).toBeVisible();
+
     const user = userEvent.setup();
     await selectServiceAward(user);
     await selectServiceRecipient(user);
@@ -180,7 +184,6 @@ describe("Service Medal Recommendation Aid", () => {
         expect(medal.buildNarrativeOpening).toEqual(expect.any(Function));
         expect(narrativeField?.systemOwnedNarrativeOpening).toBe(true);
         expect(narrativeField?.feedback).toBe("narrativeWarnings");
-        expect(medal.showLiveNarrativeWarnings).toBe(true);
         expect(medal.minimumNarrativeSentences).toEqual(expect.any(Number));
         expect(medal.minimumNarrativeSentences).toBeGreaterThan(0);
       }
@@ -418,7 +421,8 @@ describe("Service Medal Recommendation Aid", () => {
 
   test("updates combined AAM narrative warnings live before generation", async () => {
     const user = await renderSelectedServiceMedal();
-    const shortNarrative = "improving the section's readiness.";
+    const shortNarrative =
+      "improving the section's readiness. Their work supported the Regiment.";
 
     await selectServiceRecipient(user);
     await user.type(

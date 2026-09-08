@@ -24,7 +24,6 @@ export const SERVICE_MEDALS = [
     eligibilityNotes: [],
 
     criteriaHeading: "Medal Criteria",
-    showLiveNarrativeWarnings: true,
 
     buildNarrativeOpening: buildServiceNarrativeOpening,
     buildOpening: buildServiceContributionOpening,

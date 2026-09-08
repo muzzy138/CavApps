@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { render, screen } from "@testing-library/react";
 import MedalRecommendationClient from "../MedalRecommendationClient";
+import { MEDAL_FAMILY_IDS } from "../lib/medal-families.js";
 import OperationMedalRecommendationPage from "../operation/page";
 
 export function makeRecipient(overrides = {}) {
@@ -120,7 +121,7 @@ export const combatRoster = {
 
 export function renderClient({
   roster = Object.values(combatRoster),
-  medalFamily = "operation",
+  medalFamily = MEDAL_FAMILY_IDS.OPERATION,
 } = {}) {
   return render(
     createElement(MedalRecommendationClient, {
@@ -131,7 +132,7 @@ export function renderClient({
 }
 
 export function renderServiceClient(options = {}) {
-  return renderClient({ ...options, medalFamily: "service" });
+  return renderClient({ ...options, medalFamily: MEDAL_FAMILY_IDS.SERVICE });
 }
 
 export async function renderPageWithRoster(roster = combatRoster) {

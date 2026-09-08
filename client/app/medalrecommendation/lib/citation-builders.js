@@ -1,3 +1,18 @@
+export function combineNarrative(requiredOpening, continuation) {
+  const normalizedOpening = requiredOpening.trim();
+  const normalizedContinuation = continuation.trim();
+
+  if (!normalizedOpening) {
+    return normalizedContinuation;
+  }
+
+  if (!normalizedContinuation) {
+    return normalizedOpening;
+  }
+
+  return `${normalizedOpening} ${normalizedContinuation}`;
+}
+
 function buildOperationLocationDateTail({ operationTitle, location, date }) {
   return `Operation ${operationTitle} near ${location} on ${date}.`;
 }

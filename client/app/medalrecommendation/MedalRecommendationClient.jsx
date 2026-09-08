@@ -17,37 +17,14 @@ import {
   getRankEntries,
   mergeHighlightRanges,
 } from "./lib/narrative-validation";
-import {
-  getOperationMedalById,
-  OPERATION_MEDALS,
-} from "./lib/medal-definitions";
-import {
-  getServiceMedalById,
-  SERVICE_MEDALS,
-} from "./lib/service-medal-definitions";
+import { combineNarrative } from "./lib/citation-builders";
+import { getMedalFamily } from "./lib/medal-families";
 import {
   applyAwardChange,
   getCitationChoiceText,
   resolveMedalWorksheet,
 } from "./lib/worksheet-profiles";
 import { validateWorksheet } from "./lib/worksheet-validation";
-
-const MEDAL_FAMILIES = {
-  operation: {
-    medals: OPERATION_MEDALS,
-    getMedalById: getOperationMedalById,
-    awardPlaceholder: "Select an Operation Medal",
-    pageTitle: "Operation Medal Recommendation",
-    pageDescription: "Prepare and review an Operation Medal recommendation.",
-  },
-  service: {
-    medals: SERVICE_MEDALS,
-    getMedalById: getServiceMedalById,
-    awardPlaceholder: "Select a Service Medal",
-    pageTitle: "Service Medal Recommendation",
-    pageDescription: "Prepare and review a Service Medal recommendation.",
-  },
-};
 
 function formatOperationDate(value) {
   const [year, month, day] = value.split("-").map(Number);
@@ -70,21 +47,6 @@ function getCitationName(fullName) {
   }
 
   return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`;
-}
-
-function combineNarrative(requiredOpening, continuation) {
-  const normalizedOpening = requiredOpening.trim();
-  const normalizedContinuation = continuation.trim();
-
-  if (!normalizedOpening) {
-    return normalizedContinuation;
-  }
-
-  if (!normalizedContinuation) {
-    return normalizedOpening;
-  }
-
-  return `${normalizedOpening} ${normalizedContinuation}`;
 }
 
 function renderNarrativeWithHighlights(text, highlightRanges) {
@@ -319,9 +281,9 @@ function WorksheetField({
 
 export default function MedalRecommendationClient({
   recipientRoster = [],
-  medalFamily = "operation",
+  medalFamily,
 }) {
-  const family = MEDAL_FAMILIES[medalFamily] ?? MEDAL_FAMILIES.operation;
+  const family = getMedalFamily(medalFamily);
 
   const { medals, getMedalById, awardPlaceholder, pageTitle, pageDescription } =
     family;
@@ -345,6 +307,11 @@ export default function MedalRecommendationClient({
   const displayedEligibilityNotes = selectedMedal?.eligibilityNotes ?? [];
 
   const selectedWorksheet = resolveMedalWorksheet(selectedMedal);
+
+  const narrativeField = selectedWorksheet?.fields?.narrative;
+
+  const supportsLiveNarrativeWarnings =
+    narrativeField?.feedback === "narrativeWarnings";
 
   const rankEntries = useMemo(
     () => getRankEntries(rosterMembers),
@@ -404,14 +371,13 @@ export default function MedalRecommendationClient({
         })
       : "";
 
-  const effectiveNarrative = selectedWorksheet?.fields.narrative
-    ?.systemOwnedNarrativeOpening
+  const effectiveNarrative = narrativeField?.systemOwnedNarrativeOpening
     ? combineNarrative(requiredNarrativeOpening, narrative)
     : narrative;
 
   const liveNarrativeAnalysis = useMemo(() => {
     if (
-      !selectedMedal?.showLiveNarrativeWarnings ||
+      !supportsLiveNarrativeWarnings ||
       !recipientIsValid ||
       !narrative.trim()
     ) {
@@ -432,6 +398,7 @@ export default function MedalRecommendationClient({
     recipientIsValid,
     recipientRank,
     selectedMedal,
+    supportsLiveNarrativeWarnings,
   ]);
 
   function selectRecipient(member) {
